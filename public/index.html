@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <title>Bruno's Connect-4</title>
+        <link rel="stylesheet" ype="text/css" href="game.css">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="https://cdn.socket.io/socket.io-1.4.3.js"></script>
+    </head>
+    <body style="text-align: center;">
+        <h1>Bruno's Connect-4</h1>
+        <textarea rows="10" class="chatbox" id="global-chat" readonly>Welcome to Bruno's Connect-4!</textarea><br>
+        <input type="text" class="chatinput" onkeydown="globalkeydown(event)" id="globalinput" placeholder="Send a message in global chat..."><br>
+        <br>
+        <div id="noroom">
+            <button id="mkroom" onclick="makeroom()">Create a room</button><br>
+            <br>
+            Room list:<br>
+            <br>
+            <div id="roomlist"></div>
+        </div>
+        <div id="withroom" style="display: none;">
+            Current room: <b><span id="room_name"></span></b><br><br>
+            Playing with: <span id="opponent_name"></span><br>
+            <br>
+            <textarea rows="10" class="chatbox" id="room-chat" readonly></textarea><br>
+            <input type="text" class="chatinput" onkeydown="roomkeydown(event)" id="roominput" placeholder="Send a message in room chat..."><br>
+        </div>
+        <script src="game.js"></script>
+    </body>
+</html>

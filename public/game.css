@@ -1,0 +1,19 @@
+* {
+    font-family: sans-serif;
+}
+
+.chatinput {
+    width: 20em;
+}
+
+.chatbox {
+    width: 20em;
+}
+
+.room-item {
+    border: 1px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px;
+}
