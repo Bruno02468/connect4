@@ -15,10 +15,10 @@
 }
 
 #game-out span {
-    padding: 10px;
+    padding: 20px;
     font-size: 0px;
     border: 1px solid gray;
-    border-radius: 11px;
+    border-radius: 21px;
     margin-right: 2px;
 }
 
