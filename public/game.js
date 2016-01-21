@@ -64,8 +64,9 @@ function makeroom() {
     socket.emit("makeroom", roomname);
 }
 
+var mkroom = document.getElementById("mkroom");
 socket.on("onroom", function(id) {
-    document.getElementById("mkroom").style.display = "none";
+    mkroom.style.display = "none";
     socket.emit("joinroom", id);
 });
 
@@ -83,6 +84,10 @@ socket.on("roomlist", function(rooms) {
     }
 });
 
+socket.on("canMakeRoom", function() {
+    mkroom.style.display = "inline-block";
+});
+
 var yours = document.getElementById("yourwins");
 var theirs = document.getElementById("theirwins");
 var stales = document.getElementById("stalemates");
@@ -91,23 +96,20 @@ var gameout = document.getElementById("game-out");
 function drawGame(board) {
     gameout.innerHTML = "";
     for (row_index in board) {
-        var tr = document.createElement("tr");
         var row = board[row_index];
         for (col_index in row) {
-            var td = document.createElement("td");
+            var but = document.createElement("span");
             var cell = row[col_index];
-            td.className = "gamecell ";
             switch (cell) {
-                case 0: td.className += "empty"; break;
-                case 1: td.className += "creator"; break;
-                case 2: td.className += "opponent"; break;
+                case 0: but.setAttribute("class", "empty"); break;
+                case 1: but.setAttribute("class", "creator"); break;
+                case 2: but.setAttribute("class", "opponent"); break;
             }
             var col = parseInt(col_index) + 1;
-            td.setAttribute("onclick", "socket.emit(\"playAt\", " + col + ")");
-            td.innerHTML = "[  ]";
-            tr.appendChild(td);
+            but.setAttribute("onclick", "socket.emit(\"playAt\", " + col + ")");
+            gameout.appendChild(but);
         }
-        gameout.appendChild(tr);
+        gameout.innerHTML += "<div style=\"height: 24px;\">&nbsp;</span><br>"
     }
 }
 
@@ -116,14 +118,6 @@ socket.on("game-status", function (status) {
     theirs.innerHTML = status.theirwins;
     stales.innerHTML = status.stalemates;
     drawGame(status.board);
-    console.log(function(arr) {
-        var res = "";
-        for (index in arr) {
-            res += arr[index].join("");
-            res += index < (arr.length - 1) ? "\n" : "";
-        }
-        return res;
-    }(status.board));
 });
 
 socket.on("couldntjoin", function(err) {

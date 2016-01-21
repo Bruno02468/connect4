@@ -47,6 +47,7 @@ function destroyRoom(id, message) {
     if (stillAlive(room.creator)) {
         creator.emit("destroyed", message);
         creator.emit("roomlist", rooms);
+        creator.emit("canMakeRoom");
     }
     if (stillAlive(room.opponent)) {
         opponent.emit("destroyed", message);
