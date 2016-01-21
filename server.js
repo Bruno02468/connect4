@@ -42,11 +42,16 @@ function stillAlive(id) {
 
 function destroyRoom(id, message) {
     var room = getRoomById(id);
-    if (stillAlive(room.creator))
-        getSocketById(room.creator).emit("destroyed", message);
-    if (room.opponent)
-        if (stillAlive(room.opponent))
-            getSocketById(room.opponent).emit("destroyed", message);
+    var creator = getSocketById(room.creator);
+    var opponent = getSocketById(room.opponent);
+    if (stillAlive(room.creator)) {
+        creator.emit("destroyed", message);
+        creator.emit("roomlist", rooms);
+    }
+    if (stillAlive(room.opponent)) {
+        opponent.emit("destroyed", message);
+        opponent.emit("roomlist", rooms);
+    }
 }
 
 function emitToRoom(id, type, obj) {
@@ -62,6 +67,25 @@ function getSocketRoom(id) {
     }
     return null;
 }
+
+function emitGameStatus(id) {
+    var room = getRoomById(id);
+    var game = games[id];
+    var status = {
+        board: game.board,
+        yourturn: room.creatorTurn,
+        yourwins: room.creatorWins,
+        theirwins: room.opponentWins,
+        stalemates: room.stalemates
+    }
+    getSocketById(room.creator).emit("game-status", status);
+    status.yourturn = !status.yourturn;
+    status.yourwins = room.opponentWins;
+    status.theirwins = room.creatorWins;
+    getSocketById(room.opponent).emit("game-status", status);
+}
+
+var games = [];
 
 io.on('connection', function(socket) {
     online++;
@@ -90,9 +114,16 @@ io.on('connection', function(socket) {
             creatorname: socket.name,
             name: msg,
             id: roomid,
-            full: false
+            full: false,
+            creatorStarting: true,
+            creatorTurn: true,
+            creatorWins: 0,
+            opponentWins: 0,
+            stalemates: 0,
+            playing: false
         };
         rooms.push(room);
+        games[roomid] = new connect4.Game(connect4.default_rows, connect4.default_columns, connect4.default_goal);
         socket.emit("onroom", room.id);
         io.emit("roomlist", rooms);
     });
@@ -115,6 +146,8 @@ io.on('connection', function(socket) {
                 setRoomAttribute(id, "opponent", socket.id);
                 getSocketById(room.creator).emit("opponent", socket.name);
                 setRoomAttribute(id, "full", true);
+                setRoomAttribute(id, "playing", true);
+                emitGameStatus(id);
             }
             emitToRoom(id, "server-room-message", socket.name + " has joined this room.");
         }
@@ -128,6 +161,31 @@ io.on('connection', function(socket) {
         }
     });
 
+    socket.on("playAt", function(column) {
+        var id = getSocketRoom(socket.id);
+        var room = getRoomById(id);
+        if (!room.playing) return;
+        var currentTurn = room.creatorTurn ? room.creator : room.opponent;
+        if (socket.id !== currentTurn) return;
+        if (!games[id].canPlayAt(column)) return;
+        var amCreator = socket.id == room.creator;
+        var player = amCreator ? 1 : 2;
+        games[id].playAt(column, player);
+        var winner = games[id].winner();
+        switch (winner) {
+            case 0: setRoomAttribute(id, "creatorTurn", !room.creatorTurn); break;
+            case 1: setRoomAttribute(id, "creatorWins", room.creatorWins + 1); break;
+            case 2: setRoomAttribute(id, "opponentWins", room.opponentWins + 1); break;
+            case 3: setRoomAttribute(id, "stalemates", room.stalemates + 1); break;
+        }
+        if (winner > 0) {
+            setRoomAttribute(id, "creatorStarting", !room.creatorStarting);
+            setRoomAttribute(id, "creatorTurn", room.creatorStarting);
+            games[id].initBoard();
+        }
+        emitGameStatus(id);
+    });
+
     socket.on('disconnect', function() {
         online--;
         io.emit("usercount", online);
@@ -137,6 +195,7 @@ io.on('connection', function(socket) {
                 destroyRoom(room.id, "The other player left.");
                 rooms.splice(index, 1);
                 socket.emit("roomlist", rooms);
+                games[room.id] = undefined;
             }
         }
         io.emit("server-global-message", socket.name + " has left");

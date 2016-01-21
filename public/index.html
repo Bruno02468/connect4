@@ -21,8 +21,15 @@
             Current room: <b><span id="room_name"></span></b><br><br>
             Playing with: <span id="opponent_name"></span><br>
             <br>
+            You: <span id="yourwins"></span><br>
+            Them: <span id="theirwins"></span><br>
+            Stalemates: <span id="stalemates"></span><br>
+            <br>
             <textarea rows="10" class="chatbox" id="room-chat" readonly></textarea><br>
             <input type="text" class="chatinput" onkeydown="roomkeydown(event)" id="roominput" placeholder="Send a message in room chat..."><br>
+            <br>
+            <br>
+            <table id="game-out" class="mono"></table>
         </div>
         <script src="game.js"></script>
     </body>

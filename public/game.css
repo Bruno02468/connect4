@@ -17,3 +17,26 @@
     display: inline-block;
     padding: 5px;
 }
+
+.mono {
+    font-family: monospace;
+}
+
+.creator {
+    background-color: yellow;
+}
+
+.opponent {
+    background-color: red;
+}
+
+.empty {
+    background-color: lightgray;
+}
+
+.gamecell: {
+    width: 20px;
+    height: 20px;
+    border: 1px solid gray;
+    border-radius: 10px;
+}
