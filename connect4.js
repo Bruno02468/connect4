@@ -1,6 +1,6 @@
 // {} w/ <3 by 02468
 
-function Game(columns, rows, goal) {
+function Game(rows, columns, goal) {
     this.columns = columns;
     this.rows = rows;
     this.goal = goal;
@@ -61,7 +61,7 @@ Game.prototype.getLTRDiagonals = function() {
     var startCol = 1;
     var endRow = 1;
     var endCol = this.columns;
-    while (startRow !== endRow && startCol !== endCol) {
+    while (startCol !== endCol) {
         var diagonal = [];
         var currRow = startRow;
         var currCol = startCol;
